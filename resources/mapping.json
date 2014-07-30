@@ -1,0 +1,14 @@
+{
+  "completer": {
+        "properties" : {
+            "name": {"type": "string"},
+            "suggest": {
+                 "type": "completion",
+                 "index_analyzer": "standard",
+                 "search_analyzer": "standard",
+                 "payloads": true
+            }
+         }
+    }
+}
+               
