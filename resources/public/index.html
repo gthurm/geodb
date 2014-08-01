@@ -7,39 +7,61 @@
   <script src="//code.jquery.com/jquery-1.10.2.js"></script>
   <script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
   <style>
-  .ui-autocomplete-loading {
-    background: white url("images/ui-anim_basic_16x16.gif") right center no-repeat;
-  }
+    .ui-autocomplete-loading {
+      background: white url("images/ui-anim_basic_16x16.gif") right center no-repeat;
+    }
   </style>
   <script>
   $(function() {
+
+    function count( pos ) {
+      var rd = $("#radius").val();
+      $.ajax({
+        url: "http://m.mobile.de/svc/s/?vc=Car&psz=0&rd=" + rd + "&ll=" + pos.lt + "," + pos.ln,
+        crossDomain: true,
+        success: function(data) {
+          log(data.numResultsTotal + " Autos bei Mobile.de");
+        }
+      });
+    }
+
     function log( message ) {
       $( "<div>" ).text( message ).prependTo( "#log" );
       $( "#log" ).scrollTop( 0 );
     }
+
+    $("#slider").slider({
+      range: "min",
+      min:  10,
+      max: 200,
+      step: 10,
+        slide: function(event, ui) {
+          $("#radius").val(ui.value);
+        }
+    });
+
+    $("#radius").val($("#slider").slider("value"));
  
-    $( "#birds" ).autocomplete({
+    $( "#location" ).autocomplete({
       source: function(request, response) {
         $.ajax({
-           url: "/complete",
-           type: "GET",
-           data: {term: request.term},
-           success: function(data) {
-             response($.map(data.suggest[0].options, function(item) {
-               return {
+          url: "/complete",
+          type: "GET",
+          data: {term: request.term},
+          success: function(data) {
+            response($.map(data.suggest[0].options, function(item) {
+              return {
                 label: item.text,
                 value: item.text,
                 model: item.payload.pos
-               }
-             }));
-           }
+              }
+            }));
+          }
         });
       },
       minLength: 2,
       select: function( event, ui ) {
-        log( ui.item 
-          ? "Selected: " + ui.item.value + JSON.stringify(ui.item.model)
-          : "Nothing selected, input was " + this.value );
+        count(ui.item.model);
       }
     });
   });
@@ -47,16 +69,21 @@
 </head>
 <body>
  
-<div class="ui-widget">
-  <label for="birds">Birds: </label>
-  <input id="birds">
-</div>
+<p>
+  <label for="location">Location: </label>
+  <input id="location">
+
+
+<p>
+  <label for="radius">Radius:</label>
+  <input type="text" id="radius" readonly style="border:0; color:#f6931f;">
+  <div id="slider" style="width: 300px"></div>
+
  
-<div class="ui-widget" style="margin-top:2em; font-family:Arial">
+<p>
   Result:
   <div id="log" style="height: 200px; width: 300px; overflow: auto;" class="ui-widget-content"></div>
-</div>
- 
+
  
 </body>
 </html>

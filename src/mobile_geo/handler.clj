@@ -19,11 +19,11 @@
   (sql/query geo-db ["select * from geodata where country = 'DE' and city not like '% postfach'"]))
 
 (defn make-location [g]
-  {:name (g :city)
+  {:name (:city g)
    :suggest {
-     :input  [(g :city) (g :zipcode)]
-     :output (str (g :city) ", " (g :country) "-" (g :zipcode))
-     :payload {:pos {:lt (g :latitude) :ln (g :longitude)}}}})
+     :input  [(:city g) (:zipcode g)]
+     :output (str (:city g) ", " (:country g) "-" (:zipcode g))
+     :payload {:pos {:lt (:latitude g) :ln (:longitude g)}}}})
 
 (defn make-bulk-entry [g]
     (str 
@@ -33,9 +33,9 @@
       "\n"))
 
 (defn auto-complete [q]
-  (let [request   {:suggest {:text q
-                             :completion {:field "suggest"
-                                          :size 20}}}]
+  (let [request {:suggest {:text q
+                           :completion {:field "suggest"
+                                        :size 20}}}]
 
     (http/post "http://localhost:9200/location/_suggest"
                {:body (json/write-str request) 
